@@ -190,4 +190,151 @@ Workers
 
 Execution Flow
 
+# 6. Workflow Management
+What it is
+
+Designing, scheduling, monitoring, and retrying tasks in a controlled way.
+
+# Why it matters
+Ensures reliable data pipelines
+
+Handles failures and retries automatically
+# Example
+A DAG with retries, dependencies, and scheduling is workflow management.
+
+# 7. Default Arguments
+# What it is
+Common parameters shared across tasks.
+
+# Why we use it
+Avoid repetition
+
+Centralized control
+
+# Example
+default_args = {
+
+    'owner': 'airflow',
+    
+    'retries': 2,
+    
+    'retry_delay': timedelta(minutes=5)
+}
+# 8. Schedule Interval
+# What it is
+Defines when and how often a DAG runs.
+
+# Examples
+schedule_interval='@daily'
+
+schedule_interval='0 2 * * *'
+
+schedule_interval=None  # Manual only
+# 9. Catchup
+# What it is
+Whether Airflow should run past missed DAG runs.
+
+# Why important
+Avoid unexpected backfills.
+
+# Example
+catchup=False
+# 10. Task Dependencies
+# What it is
+Defines execution order of tasks.
+
+# Example
+task1 >> task2
+# 11. set_upstream() / set_downstream()
+# What it is
+Programmatic way to set dependencies.
+
+# Example
+task2.set_upstream(task1)
+
+task1.set_downstream(task2)
+# 🔹 REAL-WORLD SCENARIOS
+# 1. File-based DAG trigger (wait for file arrival)
+# Use case
+Run pipeline only when a file arrives.
+
+# Example
+FileSensor(...)
+# 2. DAG-to-DAG dependency handling
+Use case
+
+One pipeline depends on another.
+
+# Example
+TriggerDagRunOperator(...)
+# 3. Conditional task execution (branching)
+# Use case
+Run different tasks based on conditions.
+
+# Example
+from airflow.operators.branch import BranchPythonOperator
+# 4. Sequential vs Parallel task execution
+Sequential
+
+t1 >> t2 >> t3
+
+Parallel
+
+t1 >> [t2, t3]
+
+# 5. Task retry on transient failure
+Use case
+
+Temporary API/network failures.
+
+# Example
+retries=3
+retry_delay=timedelta(minutes=2)
+# 6. Partial DAG failure handling
+# Use case
+Some tasks fail, others succeed.
+
+# How Airflow handles
+Only failed tasks marked failed; downstream blocked.
+
+# 7. Rerunning only failed tasks
+How
+
+UI → Clear failed tasks
+
+Scheduler reruns only failed ones
+# 8. Backfilling historical data
+# Use case
+Load past data.
+
+# Command
+airflow dags backfill dag_id -s 2024-01-01 -e 2024-01-05
+# 9. Preventing duplicate data on reruns
+Techniques
+
+Idempotent logic
+
+Merge instead of insert
+
+Use execution_date
+# 10. Manual trigger vs scheduled run mismatch
+Problem
+
+Manual runs don’t match scheduled dates.
+
+# Solution
+Use {{ ds }} instead of system date.
+
+# 11. Handling long-running sensors
+Problem
+
+Sensors occupy worker slots.
+
+# Solution
+Use reschedule mode.
+
+# Example
+mode='reschedule'
+
+
 
